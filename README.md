@@ -14,4 +14,5 @@ Ejecutamos el servidor:
 $:python manage.py runserver 0.0.0.0:8000
 
 
+Utilizamos Python 3.12.10
 ACLARACIÓN: PRIMERO DEBE ESTAR CORRIENDO EL API DE ENVIAR CORREOS AUTOMÁTICAMENTE.
