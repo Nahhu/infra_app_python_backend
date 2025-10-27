@@ -1,10 +1,10 @@
+from django.core.validators import validate_email
 from django.db import models
 
-# Create your models here.
 class Usuario(models.Model):
-    nombre = models.CharField(max_length=50)
-    email = models.EmailField(unique=True)
-    tel = models.CharField(max_length=9)
+    nombre = models.CharField(max_length=100, unique=True)
+    email = models.CharField(max_length=100, validators=[validate_email])
+    tel = models.CharField(max_length=30)
 
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} ({self.email})"
