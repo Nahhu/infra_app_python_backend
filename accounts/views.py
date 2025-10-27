@@ -1,7 +1,7 @@
-# accounts/views.py
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
+from .models import Usuario
 import json, requests
 
 @csrf_exempt
@@ -12,9 +12,10 @@ def usuarios(request):
         email  = (data.get("email") or "").strip()
         tel    = (data.get("tel") or "").strip()
 
-        # TODO: acá guardás en tu modelo real (ej: Usuario(nombre=..., email=..., tel=...).save())
+        # ✅ Guardar en base de datos
+        user = Usuario.objects.create(nombre=nombre, email=email, tel=tel)
 
-        # 🔔 disparar mail al microservicio
+        # 🔔 Disparar correo al microservicio (si lo tenés corriendo)
         notify_url = getattr(settings, "NOTIFY_URL", "http://127.0.0.1:8001/notify")
         notify_key = getattr(settings, "NOTIFY_KEY", "super-secreta")
         payload = {
@@ -25,21 +26,23 @@ def usuarios(request):
             "text": f"Bienvenido, {nombre}!",
         }
         try:
-            r = requests.post(
+            requests.post(
                 notify_url,
                 json=payload,
                 headers={"X-API-Key": notify_key, "Content-Type": "application/json"},
                 timeout=5,
             )
-            # debug opcional:
-            # print("NOTIFY ->", r.status_code, r.text)
         except Exception:
-            pass  # en prod: log.exception(...)
+            pass  # podrías loguear el error
 
-        return JsonResponse({"ok": True, "nombre": nombre, "email": email, "tel": tel}, status=201)
+        return JsonResponse(
+            {"ok": True, "id": user.id, "nombre": nombre, "email": email, "tel": tel},
+            status=201,
+        )
 
     if request.method == "GET":
-        # TODO: devolvé tu lista real desde la BD
-        return JsonResponse([], safe=False)
+        # ✅ Devolver los usuarios guardados
+        usuarios = list(Usuario.objects.values("id", "nombre", "email", "tel"))
+        return JsonResponse(usuarios, safe=False)
 
     return JsonResponse({"error": "Método no permitido"}, status=405)
