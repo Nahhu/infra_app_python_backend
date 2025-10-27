@@ -1,6 +1,6 @@
 Para lograr ejecutarlo en una pc Localmente
 
-Primero ejecutar el comando para generar un entorno virtual
+Primero ejecutar el comando para generar un entorno virtual /n
 $:python -m venv .venv    
 Suponiendo que ya tienen instalado PYTHON y DJANGO
 Pasamos a instalar requerimientos
