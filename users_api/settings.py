@@ -39,8 +39,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'accounts',
+    'accounts.apps.AccountsConfig' # ✅ deja SOLO esta
 ]
+
+# Para que pegue contra tu microservicio de notificaciones
+NOTIFY_URL = "http://127.0.0.1:8001/notify"
+NOTIFY_KEY = "super-secreta"
+
+# (opcional) evitar problemas de host en local
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -83,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'userspy',
         'USER': 'postgres',
-        'PASSWORD': '1234',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '5432',
     }

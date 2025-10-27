@@ -1,6 +1,7 @@
+# accounts/urls.py
 from django.urls import path
-from . import views
+from .views import usuarios
 
 urlpatterns = [
-    path('usuarios/', views.usuarios, name='usuarios'),
+    path("api/usuarios/", usuarios, name="usuarios"),
 ]

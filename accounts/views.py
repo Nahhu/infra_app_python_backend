@@ -1,32 +1,45 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Usuario
-from .serializers import UsuarioSerializer
-import requests  # Para comunicarte con el servicio de correo
+# accounts/views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.conf import settings
+import json, requests
 
-API_CORREO_URL = "http://localhost:5000/api/enviar_correo"
-
-@api_view(['GET', 'POST'])
+@csrf_exempt
 def usuarios(request):
-    if request.method == 'GET':
-        usuarios = Usuario.objects.all()
-        serializer = UsuarioSerializer(usuarios, many=True)
-        return Response(serializer.data)
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        nombre = (data.get("nombre") or "").strip()
+        email  = (data.get("email") or "").strip()
+        tel    = (data.get("tel") or "").strip()
 
-    elif request.method == 'POST':
-        serializer = UsuarioSerializer(data=request.data)
-        if serializer.is_valid():
-            usuario = serializer.save()
+        # TODO: acá guardás en tu modelo real (ej: Usuario(nombre=..., email=..., tel=...).save())
 
-            # Enviar correo (si el servicio está activo)
-            try:
-                requests.post(API_CORREO_URL, json={
-                    "email": usuario.email,
-                    "nombre": usuario.nombre
-                })
-            except Exception as e:
-                print("⚠️ Error enviando correo:", e)
+        # 🔔 disparar mail al microservicio
+        notify_url = getattr(settings, "NOTIFY_URL", "http://127.0.0.1:8001/notify")
+        notify_key = getattr(settings, "NOTIFY_KEY", "super-secreta")
+        payload = {
+            "event": "user_created",
+            "to": [email],
+            "subject": "Registro OK",
+            "html": f"<b>Bienvenido, {nombre}!</b>",
+            "text": f"Bienvenido, {nombre}!",
+        }
+        try:
+            r = requests.post(
+                notify_url,
+                json=payload,
+                headers={"X-API-Key": notify_key, "Content-Type": "application/json"},
+                timeout=5,
+            )
+            # debug opcional:
+            # print("NOTIFY ->", r.status_code, r.text)
+        except Exception:
+            pass  # en prod: log.exception(...)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"ok": True, "nombre": nombre, "email": email, "tel": tel}, status=201)
+
+    if request.method == "GET":
+        # TODO: devolvé tu lista real desde la BD
+        return JsonResponse([], safe=False)
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
