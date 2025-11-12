@@ -31,7 +31,7 @@ def usuarios(request):
                 timeout=5,
             )
         except Exception:
-            pass  # podrías loguear el error
+            pass 
 
         return JsonResponse(
             {"ok": True, "id": user.id, "nombre": nombre, "email": email, "tel": tel},
@@ -39,7 +39,6 @@ def usuarios(request):
         )
 
     if request.method == "GET":
-        # ✅ Devolver los usuarios guardados
         usuarios = list(Usuario.objects.values("id", "nombre", "email", "tel"))
         return JsonResponse(usuarios, safe=False)
 
