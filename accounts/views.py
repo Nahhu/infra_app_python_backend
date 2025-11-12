@@ -12,10 +12,8 @@ def usuarios(request):
         email  = (data.get("email") or "").strip()
         tel    = (data.get("tel") or "").strip()
 
-        # ✅ Guardar en base de datos
         user = Usuario.objects.create(nombre=nombre, email=email, tel=tel)
 
-        # 🔔 Disparar correo al microservicio (si lo tenés corriendo)
         notify_url = getattr(settings, "NOTIFY_URL", "http://127.0.0.1:8001/notify")
         notify_key = getattr(settings, "NOTIFY_KEY", "super-secreta")
         payload = {
