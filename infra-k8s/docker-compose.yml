@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./infra_app_frontend
+    container_name: frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+  backend:
+    build: ./infra_app_python_backend
+    container_name: backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MAILER_URL=http://mailer:8081/send-email
+    depends_on:
+      - mailer
+    networks:
+      - app-net
+
+  mailer:
+    build: ./infra_api_notify
+    container_name: mailer
+    ports:
+      - "8081:8081"
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
