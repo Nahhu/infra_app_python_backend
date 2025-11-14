@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailer
+  template:
+    metadata:
+      labels:
+        app: mailer
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: mailer
+          image: 185278403632.dkr.ecr.us-east-1.amazonaws.com/infra-mailer:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: app-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailer-service
+spec:
+  type: ClusterIP
+  selector:
+    app: mailer
+  ports:
+    - port: 8080
+      targetPort: 8080
